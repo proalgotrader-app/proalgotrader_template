@@ -9,15 +9,16 @@ class PositionManager(PositionManagerProtocol):
         self.position = position
 
     async def initialize(self) -> None:
-        self.risk_reward = await self.position.get_risk_reward(
+        await self.position.set_risk_reward(
             sl=40,
             tgt=120,
             tsl=10,
+            unit="points",
             on_exit=self.on_exit,
         )
 
-    async def next(self) -> None:
-        await self.risk_reward.next()
-
     async def on_exit(self) -> None:
         await self.position.exit()
+
+    async def next(self) -> None:
+        pass
