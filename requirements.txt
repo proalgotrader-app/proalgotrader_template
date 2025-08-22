@@ -1,2 +1,1 @@
 proalgotrader_core
-pandas_ta
