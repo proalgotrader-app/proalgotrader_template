@@ -1,84 +1,121 @@
+"""
+SMA Crossover Strategy - Simple SMA 20 vs SMA 50 crossover for Nifty options
+"""
+
 from datetime import timedelta
+from typing import Optional
 
 from proalgotrader_core.algorithm import Algorithm
-from proalgotrader_core.broker_symbol import BrokerSymbol
-from proalgotrader_core.indicators import Indicators
-from proalgotrader_core.protocols.enums.account_type import AccountType
-from proalgotrader_core.protocols.enums.symbol_type import SymbolType
-from proalgotrader_core.protocols.strategy import StrategyProtocol
+from proalgotrader_core.order_item import OrderItem
+from proalgotrader_core.enums.market_type import MarketType
+from proalgotrader_core.enums.account_type import AccountType
+from proalgotrader_core.enums.order_type import OrderType
+from proalgotrader_core.enums.position_type import PositionType
+from proalgotrader_core.enums.product_type import ProductType
+from proalgotrader_core.enums.symbol_type import SymbolType
+from proalgotrader_core.enums.candle_type import CandleType
+from proalgotrader_core.indicators.overlap.sma import SMA
+from .position_manager import PositionManager
 
-from project.position_manager import PositionManager
 
+class Strategy(Algorithm):
+    """SMA 20 vs SMA 50 crossover strategy for Nifty options trading."""
 
-class Strategy(StrategyProtocol):
-    def __init__(self, algorithm: Algorithm) -> None:
-        self.algorithm = algorithm
-
-        self.algorithm.set_account_type(account_type=AccountType.DERIVATIVE_INTRADAY)
-
-        self.algorithm.set_interval(interval=timedelta(seconds=1))
-
-        self.algorithm.set_position_manager(position_manager=PositionManager)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.set_account_type(account_type=AccountType.DERIVATIVE_POSITIONAL)
+        self.set_position_manager(position_manager_class=PositionManager)
+        # No interval - check every tick for signals
 
     async def initialize(self) -> None:
-        self.nifty_equity = await self.algorithm.add_equity(
-            symbol_type=SymbolType.Index.NIFTY
+        """Initialize strategy with Nifty chart and SMA indicators."""
+        self.nifty_symbol = await self.add_equity(symbol_name=SymbolType.Index.NIFTY)
+        self.nifty_chart = await self.add_chart(
+            broker_symbol=self.nifty_symbol,
+            timeframe=timedelta(minutes=5),
+            candle_type=CandleType.REGULAR,
         )
 
-        self.nifty_equity_chart = await self.algorithm.add_chart(
-            broker_symbol=self.nifty_equity, timeframe=timedelta(minutes=5)
-        )
+        self.sma_20 = SMA(period=20, column="close")
+        self.sma_50 = SMA(period=50, column="close")
 
-    async def get_sma_20(self):
-        return await self.nifty_equity_chart.add_indicator(
-            "get_sma_20",
-            Indicators.Overlap.SMA(period=20),
-        )
-
-    async def get_sma_50(self):
-        return await self.nifty_equity_chart.add_indicator(
-            "get_sma_50",
-            Indicators.Overlap.SMA(period=50),
-        )
-
-    async def ce_symbol(self) -> BrokerSymbol:
-        return await self.algorithm.add_option(
-            symbol_type=SymbolType.Index.NIFTY,
-            expiry_input=("Weekly", 0),
-            strike_price_input=+2,
-            option_type="CE",
-        )
-
-    async def pe_symbol(self) -> BrokerSymbol:
-        return await self.algorithm.add_option(
-            symbol_type=SymbolType.Index.NIFTY,
-            expiry_input=("Weekly", 0),
-            strike_price_input=+2,
-            option_type="PE",
-        )
+        await self.nifty_chart.add_indicator(key="sma_20", indicator=self.sma_20)
+        await self.nifty_chart.add_indicator(key="sma_50", indicator=self.sma_50)
 
     async def next(self) -> None:
-        # Do not enter new trades if already in a position
-        if self.algorithm.open_positions:
+        """Main strategy logic - check for SMA crossover signals."""
+        # Only check for new signals if no position
+        if len(self.pending_orders) > 0 or len(self.positions) > 0:
             return
 
-        sma_20 = await self.get_sma_20()
-        sma_50 = await self.get_sma_50()
+        signal = await self._get_crossover_signal()
 
-        # 0 = current candle, -1 = previous candle
-        sma20_curr = await sma_20.get_data(0, "sma_20_close")
-        sma50_curr = await sma_50.get_data(0, "sma_50_close")
-        sma20_prev = await sma_20.get_data(-1, "sma_20_close")
-        sma50_prev = await sma_50.get_data(-1, "sma_50_close")
+        if signal == "BUY":
+            await self._buy_ce_option()
+        elif signal == "SELL":
+            await self._buy_pe_option()
 
-        # Crossovers: only act when the relationship changes this bar
-        golden_cross = sma20_prev <= sma50_prev and sma20_curr > sma50_curr
-        death_cross = sma20_prev >= sma50_prev and sma20_curr < sma50_curr
+    async def _get_crossover_signal(self) -> Optional[str]:
+        """Get SMA crossover signal."""
+        if not self.sma_20 or not self.sma_50:
+            return None
 
-        if golden_cross:
-            ce = await self.ce_symbol()
-            await self.algorithm.buy(broker_symbol=ce, quantities=50)
+        try:
+            sma_20_current = await self.sma_20.get_data(0, "sma_20_close")
+            sma_50_current = await self.sma_50.get_data(0, "sma_50_close")
+            sma_20_prev = await self.sma_20.get_data(-1, "sma_20_close")
+            sma_50_prev = await self.sma_50.get_data(-1, "sma_50_close")
 
-        if death_cross:
-            pe = await self.pe_symbol()
-            await self.algorithm.buy(broker_symbol=pe, quantities=50)
+            if None in [sma_20_current, sma_50_current, sma_20_prev, sma_50_prev]:
+                return None
+
+            # Bullish crossover
+            if sma_20_prev <= sma_50_prev and sma_20_current > sma_50_current:
+                return "BUY"
+            # Bearish crossover
+            elif sma_20_prev >= sma_50_prev and sma_20_current < sma_50_current:
+                return "SELL"
+
+            return None
+        except:
+            raise
+
+    async def _buy_ce_option(self) -> None:
+        """Buy Nifty CE option."""
+        ce_symbol = await self.add_option(
+            symbol_name=SymbolType.Index.NIFTY,
+            expiry_input=("Weekly", 0),
+            option_type="CE",
+            strike_price_input=0,
+        )
+
+        order_item = OrderItem(
+            broker_symbol=ce_symbol,
+            market_type=MarketType.Derivative,
+            product_type=ProductType.NRML,
+            order_type=OrderType.MARKET_ORDER,
+            position_type=PositionType.BUY,
+            quantities=50,
+        )
+
+        await self.create_order(order_item=order_item)
+
+    async def _buy_pe_option(self) -> None:
+        """Buy Nifty PE option."""
+        pe_symbol = await self.add_option(
+            symbol_name=SymbolType.Index.NIFTY,
+            expiry_input=("Weekly", 0),
+            option_type="PE",
+            strike_price_input=0,
+        )
+
+        order_item = OrderItem(
+            broker_symbol=pe_symbol,
+            market_type=MarketType.Derivative,
+            product_type=ProductType.NRML,
+            order_type=OrderType.MARKET_ORDER,
+            position_type=PositionType.BUY,
+            quantities=50,
+        )
+
+        await self.create_order(order_item=order_item)

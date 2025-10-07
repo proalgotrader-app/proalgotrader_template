@@ -1,4 +1,7 @@
-from proalgotrader_core.start import start
+from project.strategy import Strategy
+
+from proalgotrader_core.start import run_strategy
+
 
 if __name__ == "__main__":
-    start()
+    run_strategy(strategy_class=Strategy)
