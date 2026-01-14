@@ -536,22 +536,6 @@ wheels = [
 ]
 
 [[package]]
-name = "polars-talib"
-version = "0.1.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "polars" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/5a/7fb40579f8f37e86f4f90eb319a32760c0e4c0d919acb419916493533a06/polars_talib-0.1.5-cp37-abi3-macosx_10_12_x86_64.whl", hash = "sha256:1af11b5dbc6b50d69af4ec809cb2ca12378fe8d7b91d0871f59de5d23948634f", size = 3727507, upload-time = "2025-01-24T12:02:37.683Z" },
-    { url = "https://files.pythonhosted.org/packages/1d/a9/08c203d8e256d3490f960e390ec4046d7079df027eef13bae7c14976a0fd/polars_talib-0.1.5-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:990a488c17e96d8c816e01cef0d8eed925291a9da607081c38fc767ef665af42", size = 3551492, upload-time = "2025-01-24T12:02:42.662Z" },
-    { url = "https://files.pythonhosted.org/packages/39/89/db0dcfd565b9089c6acf15f976a81c6010a5c8c3b4c5f713cc80846a4430/polars_talib-0.1.5-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d794e0e4a4f0c28870adc8f0b7b9a89761d232db8c3534d7f8ef382cfcc6fab0", size = 4486597, upload-time = "2025-01-24T12:02:44.75Z" },
-    { url = "https://files.pythonhosted.org/packages/0d/1b/442bcdef40486474215e49fdb5eac58c474e32e465390ef08521568f9bf6/polars_talib-0.1.5-cp37-abi3-manylinux_2_38_aarch64.whl", hash = "sha256:da82f845f5f30de0108d1490eaf91c7a7e55d603f75cebd0112f56cb0d82b4fe", size = 4074481, upload-time = "2025-01-24T12:02:46.729Z" },
-    { url = "https://files.pythonhosted.org/packages/06/bd/2f53bb4cf3d2037ee43a7b85c4e984caeebb69ca17d76146832e04d69230/polars_talib-0.1.5-cp37-abi3-win32.whl", hash = "sha256:61638172eefa7e8cf531ce88ddbf11ccf2fdea4ef06246b89126e026c055dcc8", size = 2944592, upload-time = "2025-01-24T12:02:49.224Z" },
-    { url = "https://files.pythonhosted.org/packages/51/b8/8084249359790c98f463569e98331fd5686d82fce7e50790333e49bda609/polars_talib-0.1.5-cp37-abi3-win_amd64.whl", hash = "sha256:7fb2d64d3b92eb2625ac667e5395b1baf704ed6ee8a1e250eaacbde47d8d10d0", size = 3470437, upload-time = "2025-01-24T12:02:50.983Z" },
-]
-
-[[package]]
 name = "proalgotrader"
 version = "0.1.0"
 source = { virtual = "." }
@@ -564,7 +548,7 @@ requires-dist = [{ name = "proalgotrader-core" }]
 
 [[package]]
 name = "proalgotrader-core"
-version = "0.4.6"
+version = "0.4.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dependency-injector" },
@@ -572,17 +556,17 @@ dependencies = [
     { name = "logzero" },
     { name = "norenrestapipy" },
     { name = "polars" },
-    { name = "polars-talib" },
     { name = "pusher" },
     { name = "python-dotenv" },
     { name = "pytz" },
     { name = "requests" },
+    { name = "setuptools" },
     { name = "smartapi-python" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/56/15c6416fb00581c9191b2905db2cfe412308fadccd53ceb484ec446a2226/proalgotrader_core-0.4.6.tar.gz", hash = "sha256:6eb9fc5762aaad2864e164996711e9c100d81438267eb44c49dc676d4bb6ac9c", size = 45405, upload-time = "2025-09-01T02:39:19.867Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/41/2634db8af730fa6d1e3d52e75cd4cded894426311a9c587ca7b8f894d0e0/proalgotrader_core-0.4.8.tar.gz", hash = "sha256:feb802932723b9ead1acccb41acac0710ac57b2cb624c193e6d9f8bd05511fd4", size = 109446, upload-time = "2026-01-14T13:20:14.506Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/dd/0939a2b034ffd89875e568ecee25442f650692f025db25f5a8d80243c67f/proalgotrader_core-0.4.6-py3-none-any.whl", hash = "sha256:df2f8d4e2b31beea3312f21e71109caf1f711f31afafd7f49b2fbf1665aa0567", size = 88366, upload-time = "2025-09-01T02:39:18.385Z" },
+    { url = "https://files.pythonhosted.org/packages/99/22/b44201e94e805145ad4c1494b3e00f29f656a6bb574af63468dedc8ecd25/proalgotrader_core-0.4.8-py3-none-any.whl", hash = "sha256:1c1ea41e461be7f6937ce5c6ef0bc6b1dcab1bf44ea25e3f037f2efc71df99a5", size = 232612, upload-time = "2026-01-14T13:20:12.749Z" },
 ]
 
 [[package]]
@@ -806,6 +790,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/05/04/74127fc843314818edfa81b5540e26dd537353b123a4edc563109d8f17dd/s3transfer-0.16.0.tar.gz", hash = "sha256:8e990f13268025792229cd52fa10cb7163744bf56e719e0b9cb925ab79abf920", size = 153827, upload-time = "2025-12-01T02:30:59.114Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fc/51/727abb13f44c1fcf6d145979e1535a35794db0f6e450a0cb46aa24732fe2/s3transfer-0.16.0-py3-none-any.whl", hash = "sha256:18e25d66fed509e3868dc1572b3f427ff947dd2c56f844a5bf09481ad3f3b2fe", size = 86830, upload-time = "2025-12-01T02:30:57.729Z" },
+]
+
+[[package]]
+name = "setuptools"
+version = "80.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz", hash = "sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c", size = 1319958, upload-time = "2025-05-27T00:56:51.443Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl", hash = "sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922", size = 1201486, upload-time = "2025-05-27T00:56:49.664Z" },
 ]
 
 [[package]]
