@@ -1,0 +1,20 @@
+services:
+  proalgotrader_core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: proalgotrader_core
+    env_file:
+      - .env
+    command: ["python", "main.py", "--environment", "development"]
+    volumes:
+      - ./project:/app/project
+    networks:
+      - proalgotrader_core_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "proalgotrader.test:host-gateway"
+      - "proalgotrader_laravel.test:host-gateway"
+networks:
+  proalgotrader_core_network:
+    driver: bridge
