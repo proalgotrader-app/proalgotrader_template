@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: ${IMAGE_NAME:-proalgotrader_core}
     container_name: ${CONTAINER_NAME:-proalgotrader_core}
     command: [
       "uv",
