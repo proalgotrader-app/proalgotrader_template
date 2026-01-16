@@ -6,7 +6,7 @@ services:
       args:
         - BUILDKIT_INLINE_CACHE=1
     container_name: proalgotrader_core
-    command: ["uv", "run", "--watch", "main.py", "--environment", "${ENVIRONMENT:-development}"]
+    command: ["uv", "run", "main.py", "--environment", "${ENVIRONMENT:-development}"]
     volumes:
       - ./project:/app/project
       - ./main.py:/app/main.py
