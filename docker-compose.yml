@@ -24,3 +24,4 @@ services:
       - ALGO_SESSION_SECRET=${ALGO_SESSION_SECRET:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "proalgotrader_laravel.com:host-gateway"
