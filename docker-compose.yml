@@ -8,11 +8,18 @@ services:
     volumes:
       - ./project:/app/project
       - ./main.py:/app/main.py
+    environment:
+      - CONTAINER_NAME=${CONTAINER_NAME:-proalgotrader_core}
+      - NETWORK_NAME=${NETWORK_NAME:-proalgotrader_core_network}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - API_URL=${API_URL}
+      - ALGO_SESSION_KEY=${ALGO_SESSION_KEY}
+      - ALGO_SESSION_SECRET=${ALGO_SESSION_SECRET}
     networks:
-      - proalgotrader_network
+      - proalgotrader_core_network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 networks:
-  proalgotrader_network:
+  proalgotrader_core_network:
     driver: bridge
-    name: ${NETWORK_NAME:-proalgotrader_network}
+    name: ${NETWORK_NAME:-proalgotrader_core_network}
