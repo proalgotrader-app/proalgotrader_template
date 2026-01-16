@@ -3,8 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - BUILDKIT_INLINE_CACHE=1
     container_name: proalgotrader_core
     command: ["uv", "run", "main.py", "--environment", "${ENVIRONMENT:-development}"]
     volumes:

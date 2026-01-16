@@ -26,24 +26,10 @@ RUN pip install --no-cache-dir uv
 # Set work directory
 WORKDIR $WORKDIR
 
-# Copy dependency files first (for better caching)
-COPY pyproject.toml ./
-COPY uv.lock* ./
-
-# Install dependencies (cached layer)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
-
-# Copy the project files
+# Copy project files
+COPY pyproject.toml uv.lock* ./
 COPY ./project ./project
 COPY ./main.py ./
-
-# Install the project itself
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen
-
-# Add venv to PATH
-ENV PATH="/app/.venv/bin:$PATH"
 
 # Create user
 RUN useradd -m $USER \
