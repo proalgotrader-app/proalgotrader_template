@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${CONTAINER_NAME:proalgotrader_core}
+    container_name: ${CONTAINER_NAME:-proalgotrader_core}
     command: ["uv", "run", "main.py", "--environment", "${ENVIRONMENT:-development}"]
     volumes:
       - ./project:/app/project
@@ -15,4 +15,4 @@ services:
 networks:
   proalgotrader_network:
     driver: bridge
-    name: ${NETWORK_NAME:proalgotrader_network}
+    name: ${NETWORK_NAME:-proalgotrader_network}
