@@ -6,15 +6,14 @@ services:
       args:
         - BUILDKIT_INLINE_CACHE=1
     container_name: proalgotrader_core
-    command: ["python", "main.py", "--environment", "development"]
+    command: ["uv", "run", "--watch", "main.py", "--environment", "${ENVIRONMENT:-development}"]
     volumes:
       - ./project:/app/project
+      - ./main.py:/app/main.py
     networks:
       - proalgotrader_core_network
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      - "proalgotrader.test:host-gateway"
-      - "proalgotrader_laravel.test:host-gateway"
 networks:
   proalgotrader_core_network:
     driver: bridge

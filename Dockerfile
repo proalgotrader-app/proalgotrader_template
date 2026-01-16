@@ -30,27 +30,20 @@ WORKDIR $WORKDIR
 COPY pyproject.toml ./
 COPY uv.lock* ./
 
-# Install Python dependencies from pyproject.toml using uv
-RUN uv pip install --system \
-    "dependency-injector>=4.48.1" \
-    "fyers-apiv3>=3.1.7" \
-    "logzero>=1.7.0" \
-    "norenrestapipy>=0.0.22" \
-    "polars>=1.32.3" \
-    "pusher>=3.3.3" \
-    "python-dotenv>=1.1.1" \
-    "pytz>=2025.2" \
-    "requests==2.31.0" \
-    "smartapi-python>=1.5.5" \
-    "tenacity>=9.1.2"
+# Install dependencies (cached layer)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
 
-# Copy the entire project source code
-COPY ./proalgotrader_core ./proalgotrader_core
+# Copy the project files
 COPY ./project ./project
 COPY ./main.py ./
 
-# Install the package itself in editable mode
-RUN uv pip install --system -e .
+# Install the project itself
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
+# Add venv to PATH
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Create user
 RUN useradd -m $USER \
