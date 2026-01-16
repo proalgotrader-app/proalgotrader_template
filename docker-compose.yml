@@ -5,7 +5,9 @@ services:
       dockerfile: Dockerfile
     container_name: ${CONTAINER_NAME:-proalgotrader_core}
     command: [
-      "uv", "run", "main.py", 
+      "uv", 
+      "run", 
+      "main.py", 
       "--environment", "${ENVIRONMENT:-development}", 
       "--api_url", "${API_URL:-https://proalgotrader.com}", 
       "--algo_session_key", "${ALGO_SESSION_KEY:-}", 
@@ -16,6 +18,7 @@ services:
       - ./main.py:/app/main.py
     environment:
       - CONTAINER_NAME=${CONTAINER_NAME:-proalgotrader_core}
+      - NETWORK_NAME=${NETWORK_NAME:-proalgotrader_core_network}
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - API_URL=${API_URL}
       - ALGO_SESSION_KEY=${ALGO_SESSION_KEY}
@@ -27,4 +30,4 @@ services:
 networks:
   proalgotrader_core_network:
     driver: bridge
-    name: proalgotrader_core_network
+    name: ${NETWORK_NAME:-proalgotrader_core_network}
