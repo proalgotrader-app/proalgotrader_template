@@ -28,6 +28,10 @@ WORKDIR $WORKDIR
 
 # Copy project files
 COPY pyproject.toml uv.lock* ./
+
+# Install dependencies
+RUN uv sync --frozen
+
 COPY ./project ./project
 COPY ./main.py ./
 
