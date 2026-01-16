@@ -30,14 +30,6 @@ WORKDIR $WORKDIR
 COPY pyproject.toml ./
 COPY uv.lock* ./
 
-# Copy local wheel files if present (before installing dependencies)
-COPY ./libs ./libs
-
-# Install any local wheel files first
-RUN if [ -d "./libs" ] && [ "$(ls -A ./libs/*.whl 2>/dev/null)" ]; then \
-    uv pip install --system ./libs/*.whl; \
-    fi
-
 # Install Python dependencies from pyproject.toml using uv
 RUN uv pip install --system \
     "dependency-injector>=4.48.1" \

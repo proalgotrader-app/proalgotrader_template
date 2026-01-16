@@ -3,9 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     container_name: proalgotrader_core
-    env_file:
-      - .env
     command: ["python", "main.py", "--environment", "development"]
     volumes:
       - ./project:/app/project
