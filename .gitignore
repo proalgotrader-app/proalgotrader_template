@@ -1,6 +1,7 @@
 .idea
 .venv
 .vscode
-.env
+.env.paper
+.env.live
 **/__pycache__
 .mypy_cache
