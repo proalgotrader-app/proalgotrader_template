@@ -5,8 +5,9 @@ import streamlit as st
 
 from pathlib import Path
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
-from project.env_manager import EnvManager
+from env_manager import EnvManager
 
 st.set_page_config(page_title="ProAlgoTrader", page_icon="📈", layout="wide")
 
@@ -68,6 +69,42 @@ def start_docker_compose(
     env["ALGO_SESSION_KEY"] = key
     env["ALGO_SESSION_SECRET"] = secret
     env["CONTAINER_NAME"] = get_container_name(mode)
+
+    # Extract hostname from API_URL for extra_hosts
+    parsed_url = urlparse(api_url)
+    api_hostname = parsed_url.hostname or parsed_url.netloc.split(":")[0]
+
+    # Update docker-compose.yml to add the hostname to extra_hosts if not exists
+    compose_file = Path(__file__).parent / "docker-compose.yml"
+    compose_content = compose_file.read_text()
+
+    # Check if the hostname already exists in extra_hosts
+    host_entry = f'"{api_hostname}:host-gateway"'
+    if host_entry not in compose_content:
+        # Find the extra_hosts section and add the new host
+        lines = compose_content.split('\n')
+        new_lines = []
+        in_extra_hosts = False
+        extra_hosts_indent = ""
+
+        for i, line in enumerate(lines):
+            new_lines.append(line)
+            if 'extra_hosts:' in line:
+                in_extra_hosts = True
+                # Get the indentation of extra_hosts line
+                extra_hosts_indent = len(line) - len(line.lstrip()) + 2
+            elif in_extra_hosts and line.strip().startswith('- "'):
+                # Check if we're at the end of extra_hosts entries
+                if i + 1 >= len(lines) or not lines[i + 1].strip().startswith('- "'):
+                    # Add the new host entry
+                    indent = ' ' * int(extra_hosts_indent)
+                    new_lines.pop()
+                    new_lines.append(f'{indent}- "{api_hostname}:host-gateway"')
+                    new_lines.append(line)
+                    in_extra_hosts = False
+
+        compose_content = '\n'.join(new_lines)
+        compose_file.write_text(compose_content)
 
     result = subprocess.run(
         ["docker", "compose", "up", "--build", "-d"],
@@ -346,11 +383,12 @@ if st.session_state.is_running:
 
 # Display logs
 if full_logs:
+    # Ensure all log entries are strings
+    log_text = "\n".join(str(log) for log in full_logs)
     st.text_area(
         "Terminal Output",
-        value="\n".join(full_logs),
+        value=log_text,
         height=700,
-        key="logs",
         label_visibility="collapsed",
     )
 

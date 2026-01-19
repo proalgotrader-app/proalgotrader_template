@@ -24,4 +24,5 @@ services:
       - API_URL=${API_URL:-https://proalgotrader.com}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "proalgotrader_laravel.test:host-gateway"
       - "proalgotrader.com:host-gateway"
