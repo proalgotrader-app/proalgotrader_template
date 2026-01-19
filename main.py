@@ -61,16 +61,13 @@ def start_docker_compose(
 ) -> str:
     """Start docker compose and return output."""
     env = os.environ.copy()
-    env.update(
-        {
-            "MODE": mode,
-            "ENVIRONMENT": environment,
-            "API_URL": api_url,
-            "ALGO_SESSION_KEY": key,
-            "ALGO_SESSION_SECRET": secret,
-            "CONTAINER_NAME": get_container_name(mode),
-        }
-    )
+    # Set environment variables that docker compose will use for variable expansion
+    env["MODE"] = mode
+    env["ENVIRONMENT"] = environment
+    env["API_URL"] = api_url
+    env["ALGO_SESSION_KEY"] = key
+    env["ALGO_SESSION_SECRET"] = secret
+    env["CONTAINER_NAME"] = get_container_name(mode)
 
     result = subprocess.run(
         ["docker", "compose", "up", "--build", "-d"],
