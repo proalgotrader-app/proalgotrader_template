@@ -11,19 +11,15 @@ services:
       "run.py",
       "--mode", "${MODE:-paper}",
       "--environment", "${ENVIRONMENT:-development}",
-      "--api_url", "${API_URL:-https://proalgotrader.com}",
-      "--algo_session_key", "${ALGO_SESSION_KEY:-}",
-      "--algo_session_secret", "${ALGO_SESSION_SECRET:-}"
+      "--api_url", "${API_URL:-https://proalgotrader.com}"
     ]
     volumes:
       - ./project:/app/project
-      - ./main.py:/app/main.py
+      - ./run.py:/app/run.py
     environment:
       - CONTAINER_NAME=${CONTAINER_NAME:-proalgotrader_core}
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - API_URL=${API_URL:-}
-      - ALGO_SESSION_KEY=${ALGO_SESSION_KEY:-}
-      - ALGO_SESSION_SECRET=${ALGO_SESSION_SECRET:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "proalgotrader.com:host-gateway"
