@@ -48,6 +48,7 @@ def check_container_running(container_name: str) -> bool:
     try:
         result = subprocess.run(
             ["docker", "inspect", "-f", "{{.State.Running}}", container_name],
+            env=os.environ.copy(),
             capture_output=True,
             text=True,
             timeout=5,
@@ -127,10 +128,13 @@ def start_docker_compose(
 
 def stop_docker_compose(container_name: str) -> str:
     """Stop docker compose and return output."""
+    env = os.environ.copy()
+    env["CONTAINER_NAME"] = container_name
+
     result = subprocess.run(
         ["docker", "compose", "down"],
         cwd=Path(__file__).parent,
-        env={"CONTAINER_NAME": container_name},
+        env=env,
         capture_output=True,
         text=True,
         timeout=60,
@@ -148,6 +152,7 @@ def get_all_logs(container_name: str) -> str:
     try:
         result = subprocess.run(
             ["docker", "logs", container_name],
+            env=os.environ.copy(),
             capture_output=True,
             text=True,
             timeout=10,
