@@ -34,6 +34,7 @@ RUN uv sync --frozen
 
 COPY ./project ./project
 COPY ./main.py ./
+COPY ./run.py ./
 
 # Create user
 RUN useradd -m $USER \

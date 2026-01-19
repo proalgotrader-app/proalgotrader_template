@@ -8,7 +8,8 @@ services:
     command: [
       "uv",
       "run",
-      "main.py",
+      "run.py",
+      "--mode", "${MODE:-paper}",
       "--environment", "${ENVIRONMENT:-development}",
       "--api_url", "${API_URL:-https://proalgotrader.com}",
       "--algo_session_key", "${ALGO_SESSION_KEY:-}",
