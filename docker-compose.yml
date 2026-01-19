@@ -16,6 +16,8 @@ services:
     volumes:
       - ./project:/app/project
       - ./run.py:/app/run.py
+      - ./.env.paper:/app/.env.paper
+      - ./.env.live:/app/.env.live
     environment:
       - CONTAINER_NAME=${CONTAINER_NAME:-proalgotrader_core}
       - ENVIRONMENT=${ENVIRONMENT:-development}

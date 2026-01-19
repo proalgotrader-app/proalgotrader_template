@@ -33,7 +33,6 @@ COPY pyproject.toml uv.lock* ./
 RUN uv sync --frozen
 
 COPY ./project ./project
-COPY ./main.py ./
 COPY ./run.py ./
 
 # Create user

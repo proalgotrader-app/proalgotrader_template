@@ -1,10 +1,12 @@
 import os
 import subprocess
 import time
-from pathlib import Path
-
 import streamlit as st
+
+from pathlib import Path
 from dotenv import load_dotenv
+
+from project.env_manager import EnvManager
 
 st.set_page_config(page_title="ProAlgoTrader", page_icon="📈", layout="wide")
 
@@ -19,6 +21,10 @@ if "api_url" not in st.session_state:
     st.session_state.api_url = "https://proalgotrader_laravel.test"
 if "logs" not in st.session_state:
     st.session_state.logs = []
+if "show_env_manager" not in st.session_state:
+    st.session_state.show_env_manager = False
+if "env_manager_tab" not in st.session_state:
+    st.session_state.env_manager_tab = 0
 
 
 def load_env_vars(mode: str) -> tuple[str, str]:
@@ -117,6 +123,103 @@ def get_all_logs(container_name: str) -> str:
         return ""
 
 
+def render_env_manager() -> None:
+    """Render the environment manager dialog."""
+    env_manager = EnvManager(Path(__file__).parent)
+
+    st.title("Manage Environments")
+    st.markdown("Update environment variables for Paper and Live trading modes.")
+
+    tab1, tab2 = st.tabs(["Paper Trading", "Live Trading"])
+
+    with tab1:
+        render_env_tab(env_manager, "paper")
+
+    with tab2:
+        render_env_tab(env_manager, "live")
+
+    if st.button("Close", key="close_env_manager"):
+        st.session_state.show_env_manager = False
+        st.rerun()
+
+
+def render_env_tab(env_manager: EnvManager, mode: str) -> None:
+    """Render a single environment tab.
+
+    Args:
+        env_manager: EnvManager instance.
+        mode: Trading mode ('paper' or 'live').
+    """
+    env_file = env_manager.get_env_file_path(mode)
+
+    st.subheader(f"`.env.{mode}` File")
+    st.caption(f"Path: `{env_file}`")
+
+    if not env_manager.env_file_exists(mode):
+        st.warning(f"⚠️ `.env.{mode}` file does not exist. Add variables below to create it.")
+    else:
+        st.success(f"✅ `.env.{mode}` file exists")
+
+    st.markdown("#### Environment Variables")
+
+    st.info("""
+    **Configuration Note:**
+    - `.env.{mode}` files store: `ALGO_SESSION_KEY`, `ALGO_SESSION_SECRET`
+    - `ENVIRONMENT` and `API_URL` are set in the sidebar and passed via command line
+    """)
+
+    # Read current environment variables
+    env_vars = env_manager.read_env_file(mode)
+
+    # Show form for editing
+    with st.form(key=f"env_form_{mode}"):
+        st.markdown("**Update Session Credentials**")
+
+        # ALGO_SESSION_KEY
+        session_key = st.text_input(
+            "ALGO_SESSION_KEY",
+            value=env_vars.get("ALGO_SESSION_KEY", ""),
+            key=f"{mode}_ALGO_SESSION_KEY",
+        )
+
+        # ALGO_SESSION_SECRET
+        session_secret = st.text_input(
+            "ALGO_SESSION_SECRET",
+            value=env_vars.get("ALGO_SESSION_SECRET", ""),
+            key=f"{mode}_ALGO_SESSION_SECRET",
+            type="password",
+        )
+
+        # Submit button
+        submitted = st.form_submit_button("💾 Save Changes", type="primary")
+
+        if submitted:
+            # Build final env vars dict with only the two required variables
+            final_vars = {}
+
+            if session_key:
+                final_vars["ALGO_SESSION_KEY"] = session_key
+            if session_secret:
+                final_vars["ALGO_SESSION_SECRET"] = session_secret
+
+            # Write to file
+            env_manager.write_env_file(mode, final_vars)
+            st.success(f"✅ Saved to `.env.{mode}`")
+            time.sleep(1)
+            st.rerun()
+
+    # Show current file contents
+    st.markdown("#### Current File Contents")
+    current_vars = env_manager.read_env_file(mode)
+    if current_vars:
+        for key, value in current_vars.items():
+            if key == "ALGO_SESSION_SECRET":
+                value = "*" * len(value)
+            st.code(f"{key}={value}")
+    else:
+        st.info("No variables set.")
+
+
 # Sidebar - Settings
 with st.sidebar:
     st.title("⚙️ Settings")
@@ -176,7 +279,8 @@ with st.sidebar:
     else:
         if st.button("▶️ Start", type="primary", use_container_width=True):
             if not key or not secret:
-                st.error(f"❌ No `.env.{mode}` file found")
+                st.error(f"❌ No `.env.{mode}` file found or missing required variables")
+                st.info("👆 Click **Manage Environments** below to create/update the configuration")
             else:
                 with st.spinner("Starting..."):
                     try:
@@ -191,6 +295,36 @@ with st.sidebar:
                     except Exception as e:
                         st.error(f"Failed: {e}")
                         st.session_state.logs.append(f"\n=== Error ===\n{str(e)}\n")
+
+    st.markdown("---")
+
+    # Manage Environments button
+    if st.button("🔧 Manage Environments", use_container_width=True, disabled=st.session_state.is_running):
+        st.session_state.show_env_manager = True
+        st.rerun()
+
+
+# Show environment manager if opened
+if st.session_state.show_env_manager:
+    render_env_manager()
+    st.stop()  # Stop execution so main content isn't shown
+
+
+# Check if env files exist for both modes
+env_manager = EnvManager(Path(__file__).parent)
+paper_exists = env_manager.env_file_exists("paper")
+live_exists = env_manager.env_file_exists("live")
+
+# Show setup warning if env files are missing
+if not paper_exists or not live_exists:
+    st.warning("⚠️ **Setup Required**: Environment files not found")
+    missing = []
+    if not paper_exists:
+        missing.append("`.env.paper`")
+    if not live_exists:
+        missing.append("`.env.live`")
+    st.info(f"Missing: {', '.join(missing)}\n\n👉 Click **Manage Environments** in the sidebar to create them.")
+    st.markdown("---")
 
 
 # Main content - Logs
