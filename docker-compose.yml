@@ -21,7 +21,7 @@ services:
     environment:
       - CONTAINER_NAME=${CONTAINER_NAME:-proalgotrader_core}
       - ENVIRONMENT=${ENVIRONMENT:-development}
-      - API_URL=${API_URL:-}
+      - API_URL=${API_URL:-https://proalgotrader.com}
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "proalgotrader.com:host-gateway"
