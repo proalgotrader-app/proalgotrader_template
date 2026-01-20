@@ -9,7 +9,6 @@ from proalgotrader_core.enums.symbol_type import SymbolType
 from proalgotrader_core.order_item import OrderItem
 from proalgotrader_core.protocols.position import PositionProtocol
 from proalgotrader_core.risk_reward import Stoploss, Target
-from project.signal_manager import SignalManager
 
 
 class Strategy(Algorithm):
@@ -29,10 +28,7 @@ class Strategy(Algorithm):
         )
 
     async def initialize(self) -> None:
-        await self.add_signals(
-            signal_manager=SignalManager,
-            symbol_names=[SymbolType.Stock.ADANIENT],
-        )
+        pass
 
     async def next(self) -> None:
         if self.positions:
